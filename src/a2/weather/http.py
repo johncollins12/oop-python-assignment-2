@@ -90,10 +90,22 @@ def fetch(
     raise RequestFailedError(url, policy.max_attempts, last_reason)
 
 
-def get_json(url: str, params: Mapping[str, Any] | None = None, **kwargs: Any) -> Any:
-    """`fetch` and decode the JSON body; a body that is not JSON raises RequestFailedError."""
+def get_json(url: str, params: Mapping[str, Any] | None = None, *, cache: Any = None,
+             **kwargs: Any) -> Any:
+    """`fetch` and decode the JSON body; a body that is not JSON raises RequestFailedError.
+
+    If a `cache` (a ResponseCache) is given, a fresh cached body is returned without any
+    request, and a new response is stored until its Expires time (or the cache's default TTL).
+    """
+    if cache is not None:
+        cached = cache.get(url, params)
+        if cached is not None:
+            return cached
     response = fetch(url, params, **kwargs)
     try:
-        return response.json()
+        body = response.json()
     except ValueError as err:
         raise RequestFailedError(url, 1, "response body is not valid JSON") from err
+    if cache is not None:
+        cache.put(url, params, body, response.headers)
+    return body
