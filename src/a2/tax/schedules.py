@@ -80,8 +80,9 @@ class ProgressiveSchedule:
             part = band.taxable_part(income)
             if part > Money.zero() and band.rate > 0:
                 amount = part * band.rate
-                upper = "" if band.upper is None else f"–{band.upper.amount:,.0f}"
-                lines.append((f"{band.rate:.0%} on {band.lower.amount:,.0f}{upper}", amount))
+                where = (f"above {band.lower.amount:,.0f}" if band.upper is None
+                         else f"on {band.lower.amount:,.0f}–{band.upper.amount:,.0f}")
+                lines.append((f"{band.rate:.0%} {where}", amount))
                 total = total + amount
         if self.surcharge_threshold is not None and self.surcharge_threshold < income:
             amount = (income - self.surcharge_threshold) * self.surcharge_rate
