@@ -1,0 +1,8 @@
+{
+ "status": 400,
+ "content_type": "application/json; charset=utf-8",
+ "body": {
+  "error": true,
+  "reason": "Latitude must be in range of -90 to 90°. Given: 100.0."
+ }
+}
